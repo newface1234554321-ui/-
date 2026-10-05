@@ -53,4 +53,10 @@ async function remove(id){
  const {error}=await sb.from("stickers").delete().eq("id",id);
  if(error)alert(error.message);else load();
 }
+modal.addEventListener("click", (e) => {
+  if (e.target === modal) {
+    modal.hidden = true;
+  }
+});
+
 init();
