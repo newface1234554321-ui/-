@@ -7,6 +7,7 @@ let all = [];
 
 const grid = document.getElementById("grid");
 const empty = document.getElementById("empty");
+const formFilter = document.getElementById("formFilter");
 
 async function load() {
   const { data, error } = await sb
@@ -26,7 +27,44 @@ async function load() {
 
   all = data || [];
 
+  updateFormFilter();
   render();
+}
+
+function updateFormFilter() {
+  const currentValue = formFilter.value;
+
+  const forms = [
+    ...new Set(
+      all.map(function (item) {
+        return (item.form || "일반").trim();
+      })
+    )
+  ];
+
+  forms.sort(function (a, b) {
+    if (a === "일반") return -1;
+    if (b === "일반") return 1;
+
+    return a.localeCompare(b, "ko");
+  });
+
+  formFilter.innerHTML = `
+    <option value="all">전체 폼</option>
+    ${forms
+      .map(function (form) {
+        return `
+          <option value="${escapeHtml(form)}">
+            ${escapeHtml(form)}
+          </option>
+        `;
+      })
+      .join("")}
+  `;
+
+  if (forms.includes(currentValue)) {
+    formFilter.value = currentValue;
+  }
 }
 
 function render() {
@@ -37,16 +75,29 @@ function render() {
     .toLowerCase();
 
   const status = document.getElementById("status").value;
+  const selectedForm = formFilter.value;
 
   const list = all.filter(function (item) {
+    const itemForm = (item.form || "일반").trim();
+
+    const matchesSearch =
+      !q ||
+      String(item.number).includes(q) ||
+      (item.name || "").toLowerCase().includes(q) ||
+      itemForm.toLowerCase().includes(q);
+
+    const matchesStatus =
+      status === "all" ||
+      item.status === status;
+
+    const matchesForm =
+      selectedForm === "all" ||
+      itemForm === selectedForm;
+
     return (
-      (status === "all" || item.status === status) &&
-      (
-        !q ||
-        String(item.number).includes(q) ||
-        (item.name || "").toLowerCase().includes(q) ||
-        (item.form || "").toLowerCase().includes(q)
-      )
+      matchesSearch &&
+      matchesStatus &&
+      matchesForm
     );
   });
 
@@ -157,5 +208,10 @@ document
 document
   .getElementById("status")
   .addEventListener("change", render);
+
+formFilter.addEventListener(
+  "change",
+  render
+);
 
 load();
