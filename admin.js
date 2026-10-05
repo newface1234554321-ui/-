@@ -571,3 +571,227 @@ document
 
 
 checkLogin();
+/* =========================
+   전국도감 1~1025 자동 등록
+========================= */
+
+const pokemonLoadBtn = document.getElementById("pokemonLoadBtn");
+const pokemonLoadMsg = document.getElementById("pokemonLoadMsg");
+
+if (pokemonLoadBtn) {
+
+  pokemonLoadBtn.addEventListener("click", async function () {
+
+    const ok = confirm(
+      "전국도감 1~1025번을 자동으로 등록할까?\n\n" +
+      "이미 등록된 포켓몬은 건드리지 않고\n" +
+      "없는 포켓몬만 '구하는 중'으로 추가해."
+    );
+
+    if (!ok) return;
+
+    pokemonLoadBtn.disabled = true;
+
+    pokemonLoadMsg.textContent =
+      "기존 띠부실 목록을 확인하는 중...";
+
+    try {
+
+      /* 현재 등록된 번호 확인 */
+
+      const existingResult = await sb
+        .from("stickers")
+        .select("number");
+
+      if (existingResult.error) {
+        throw existingResult.error;
+      }
+
+      const existingNumbers = new Set(
+        (existingResult.data || []).map(
+          x => Number(x.number)
+        )
+      );
+
+
+      /* 포켓몬 목록 가져오기 */
+
+      pokemonLoadMsg.textContent =
+        "전국도감 정보를 가져오는 중...";
+
+      const listResponse = await fetch(
+        "https://pokeapi.co/api/v2/pokemon-species?limit=1025&offset=0"
+      );
+
+      if (!listResponse.ok) {
+        throw new Error(
+          "포켓몬 목록을 가져오지 못했어"
+        );
+      }
+
+      const listData =
+        await listResponse.json();
+
+
+      const pokemonList =
+        listData.results.map(
+          (pokemon, index) => ({
+            number: index + 1,
+            url: pokemon.url
+          })
+        );
+
+
+      const newPokemon = [];
+
+
+      /* 포켓몬 이름 가져오기 */
+
+      for (
+        let i = 0;
+        i < pokemonList.length;
+        i++
+      ) {
+
+        const pokemon =
+          pokemonList[i];
+
+
+        /* 이미 등록되어 있으면 건너뜀 */
+
+        if (
+          existingNumbers.has(
+            pokemon.number
+          )
+        ) {
+          continue;
+        }
+
+
+        const response =
+          await fetch(pokemon.url);
+
+
+        if (!response.ok) {
+          throw new Error(
+            `#${pokemon.number} 정보를 가져오지 못했어`
+          );
+        }
+
+
+        const data =
+          await response.json();
+
+
+        /* 한국어 이름 찾기 */
+
+        const koreanName =
+          data.names?.find(
+            x =>
+              x.language?.name === "ko"
+          );
+
+
+        const name =
+          koreanName?.name ||
+          data.name;
+
+
+        newPokemon.push({
+
+          number: pokemon.number,
+
+          name: name,
+
+          status: "wanted",
+
+          note: ""
+
+        });
+
+
+        pokemonLoadMsg.textContent =
+          `포켓몬 정보 가져오는 중... ${i + 1} / 1025`;
+
+      }
+
+
+      /* 새로 추가할 포켓몬이 없는 경우 */
+
+      if (newPokemon.length === 0) {
+
+        pokemonLoadMsg.textContent =
+          "이미 1~1025번이 전부 등록되어 있어.";
+
+        pokemonLoadBtn.disabled = false;
+
+        return;
+      }
+
+
+      /* 100마리씩 등록 */
+
+      const batchSize = 100;
+
+
+      for (
+        let i = 0;
+        i < newPokemon.length;
+        i += batchSize
+      ) {
+
+        const batch =
+          newPokemon.slice(
+            i,
+            i + batchSize
+          );
+
+
+        const result =
+          await sb
+            .from("stickers")
+            .insert(batch);
+
+
+        if (result.error) {
+          throw result.error;
+        }
+
+
+        pokemonLoadMsg.textContent =
+          `등록 중... ${
+            Math.min(
+              i + batch.length,
+              newPokemon.length
+            )
+          } / ${newPokemon.length}`;
+
+      }
+
+
+      pokemonLoadMsg.textContent =
+        `완료! ${newPokemon.length}마리가 등록됐어.`;
+
+
+      /* 관리자 목록 새로고침 */
+
+      await loadStickers();
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      pokemonLoadMsg.textContent =
+        "등록 중 오류가 발생했어: " +
+        error.message;
+
+    } finally {
+
+      pokemonLoadBtn.disabled = false;
+
+    }
+
+  });
+
+}
