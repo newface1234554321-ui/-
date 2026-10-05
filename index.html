@@ -2,180 +2,17 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>띠부도감 1025 | 포켓몬 띠부씰 컬렉션</title>
+
+  <meta name="description" content="포켓몬 띠부씰 1025종의 보유 및 구하는 목록을 확인할 수 있는 띠부도감입니다.">
 
   <link rel="stylesheet" href="style.css">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script defer src="app.js?v=5"></script>
-
-  <style>
-    /* =========================
-       모바일 최적화
-       ========================= */
-
-    @media (max-width: 600px) {
-
-      * {
-        box-sizing: border-box;
-      }
-
-      html,
-      body {
-        width: 100%;
-        max-width: 100%;
-        overflow-x: hidden;
-      }
-
-      body {
-        margin: 0;
-      }
-
-      .wrap {
-        width: 100%;
-        max-width: 100%;
-        padding-left: 14px;
-        padding-right: 14px;
-      }
-
-      /* 상단 메뉴 */
-      .nav {
-        min-height: 60px;
-        gap: 10px;
-      }
-
-      .brand {
-        font-size: 18px;
-      }
-
-      .brand span {
-        font-size: 11px;
-      }
-
-      .admin-link {
-        font-size: 13px;
-        white-space: nowrap;
-      }
-
-      /* 메인 소개 */
-      .hero {
-        padding: 32px 0 24px;
-      }
-
-      .eyebrow {
-        font-size: 10px;
-        letter-spacing: 1px;
-      }
-
-      .hero h1 {
-        font-size: 30px;
-        line-height: 1.25;
-      }
-
-      .sub {
-        font-size: 13px;
-        line-height: 1.6;
-      }
-
-      /* 통계 */
-      .stats {
-        width: 100%;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-      }
-
-      .stat {
-        min-width: 0;
-        padding: 14px 5px;
-      }
-
-      .stat strong {
-        font-size: 20px;
-      }
-
-      .stat span {
-        font-size: 11px;
-      }
-
-      /* 검색 / 필터 */
-      .toolbar {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .toolbar input,
-      .toolbar select {
-        width: 100%;
-        min-width: 0;
-        height: 44px;
-        font-size: 14px;
-      }
-
-      /* 카드 */
-      .grid {
-        width: 100%;
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-      }
-
-      .grid > * {
-        min-width: 0;
-        width: 100%;
-      }
-
-      /* 카드 안 이미지가 화면 밖으로 나가지 않게 */
-      .grid img {
-        max-width: 100%;
-        height: auto;
-      }
-
-      /* 카드 안 글자가 너무 길어져도 깨지지 않게 */
-      .grid * {
-        max-width: 100%;
-      }
-
-      /* 빈 화면 */
-      .empty {
-        font-size: 13px;
-        padding: 40px 10px;
-        text-align: center;
-      }
-
-      /* 하단 */
-      footer {
-        padding: 30px 14px;
-        font-size: 11px;
-      }
-    }
-
-    /* 아주 작은 휴대폰 */
-    @media (max-width: 380px) {
-
-      .wrap {
-        padding-left: 10px;
-        padding-right: 10px;
-      }
-
-      .hero h1 {
-        font-size: 27px;
-      }
-
-      .grid {
-        gap: 7px;
-      }
-
-      .stat strong {
-        font-size: 18px;
-      }
-    }
-  </style>
 </head>
 
 <body>
@@ -184,7 +21,7 @@
   <div class="wrap nav">
 
     <div class="brand">
-      띠부실 <span>COLLECTION</span>
+      띠부도감 <span>1025</span>
     </div>
 
     <a class="admin-link" href="admin.html">
@@ -204,12 +41,12 @@
       </p>
 
       <h1>
-        보유 띠부실을<br>
+        포켓몬 띠부씰을<br>
         <b>한눈에 확인하세요</b>
       </h1>
 
       <p class="sub">
-        현재 보유 중인 띠부실과 찾고 있는 띠부실을 정리해 둔 페이지입니다.
+        현재 보유 중인 띠부씰과 찾고 있는 띠부씰을 정리해 둔 띠부도감입니다.
       </p>
 
     </div>
@@ -238,9 +75,7 @@
 
     <input
       id="search"
-      type="search"
       placeholder="번호 또는 포켓몬 이름 검색"
-      autocomplete="off"
     >
 
     <select id="status">
@@ -258,13 +93,13 @@
   <section id="grid" class="grid"></section>
 
   <p id="empty" class="empty" hidden>
-    등록된 띠부실이 없습니다.
+    등록된 띠부씰이 없습니다.
   </p>
 
 </main>
 
 <footer>
-  띠부실 COLLECTION
+  띠부도감 1025
 </footer>
 
 </body>
