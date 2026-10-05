@@ -126,6 +126,14 @@
     </button>
 
     <button
+      id="bulkOwnedBtn"
+      class="primary"
+      type="button"
+    >
+      보유 목록 일괄 등록
+    </button>
+
+    <button
       id="addBtn"
       class="primary"
       type="button"
@@ -140,6 +148,11 @@
 
 <p
   id="pokemonLoadMsg"
+  class="msg"
+></p>
+
+<p
+  id="bulkOwnedMsg"
   class="msg"
 ></p>
 
@@ -160,33 +173,19 @@
 
         <tr>
 
-          <th>
-            번호
-          </th>
+          <th>번호</th>
 
-          <th>
-            이름
-          </th>
+          <th>이름</th>
 
-          <th>
-            상태
-          </th>
+          <th>상태</th>
 
-          <th>
-            수량
-          </th>
+          <th>수량</th>
 
-          <th>
-            폼
-          </th>
+          <th>폼</th>
 
-          <th>
-            메모
-          </th>
+          <th>메모</th>
 
-          <th>
-            관리
-          </th>
+          <th>관리</th>
 
         </tr>
 
@@ -232,8 +231,6 @@
   </h2>
 
 
-  <!-- 번호 -->
-
   <label>
 
     번호
@@ -248,8 +245,6 @@
   </label>
 
 
-  <!-- 이름 -->
-
   <label>
 
     포켓몬 이름
@@ -262,8 +257,6 @@
 
   </label>
 
-
-  <!-- 상태 -->
 
   <label>
 
@@ -284,8 +277,6 @@
   </label>
 
 
-  <!-- 수량 -->
-
   <label>
 
     보유 수량
@@ -301,8 +292,6 @@
   </label>
 
 
-  <!-- 폼 -->
-
   <label>
 
     폼 / 형태
@@ -316,8 +305,6 @@
 
   </label>
 
-
-  <!-- 메모 -->
 
   <label>
 
@@ -345,6 +332,74 @@
     class="msg"
   ></p>
 
+
+</div>
+```
+
+  </div>
+
+  <!-- =========================
+       보유 목록 일괄 등록 모달
+  ========================== -->
+
+  <div
+    id="bulkModal"
+    class="modal"
+    hidden
+  >
+
+```
+<div class="modal-card">
+
+  <button
+    id="closeBulkModal"
+    class="close"
+    type="button"
+  >
+    ×
+  </button>
+
+
+  <h2>
+    보유 띠부실 일괄 등록
+  </h2>
+
+
+  <p>
+    번호, 수량, 폼을 입력하면
+    기존 전국도감 목록에 자동으로 반영됩니다.
+  </p>
+
+
+  <textarea
+    id="bulkInput"
+    style="width:100%;min-height:260px;"
+    placeholder="예시
+```
+
+001 | 1 | 일반
+003 | 2 | 일반
+012 | 1 | 거다이맥스
+037 | 1 | 알로하
+088 | 2 | 알로하
+131 | 1 | 거다이맥스
+150 | 1 | 일반"
+></textarea>
+
+```
+  <button
+    id="bulkSaveBtn"
+    class="primary"
+    type="button"
+  >
+    일괄 등록
+  </button>
+
+
+  <p
+    id="bulkMsg"
+    class="msg"
+  ></p>
 
 </div>
 ```
