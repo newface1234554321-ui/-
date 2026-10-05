@@ -14,13 +14,11 @@ let editingId = null;
 
 
 /* =========================
-   로그인 상태
+   로그인
 ========================= */
 
 async function checkLogin() {
-
   const result = await sb.auth.getSession();
-
   const session = result.data.session;
 
   if (session) {
@@ -30,29 +28,23 @@ async function checkLogin() {
   }
 }
 
-
 function showLogin() {
-
   loginBox.hidden = false;
   manageBox.hidden = true;
   logoutButton.hidden = true;
-
 }
 
-
 function showAdmin(session) {
-
   loginBox.hidden = true;
   manageBox.hidden = false;
   logoutButton.hidden = false;
 
   loadStickers();
-
 }
 
 
 /* =========================
-   로그인
+   로그인 버튼
 ========================= */
 
 loginButton.addEventListener("click", async function () {
@@ -64,27 +56,19 @@ loginButton.addEventListener("click", async function () {
     document.getElementById("password").value;
 
   if (!email || !password) {
-
     loginMsg.textContent =
       "이메일과 비밀번호를 입력해줘";
-
     return;
   }
 
   loginButton.disabled = true;
-
-  loginMsg.textContent =
-    "로그인 중...";
-
+  loginMsg.textContent = "로그인 중...";
 
   const result =
     await sb.auth.signInWithPassword({
-
       email: email,
       password: password
-
     });
-
 
   if (result.error) {
 
@@ -92,19 +76,15 @@ loginButton.addEventListener("click", async function () {
       result.error.message;
 
     loginButton.disabled = false;
-
     return;
   }
-
 
   loginMsg.textContent =
     "로그인 완료";
 
-
   showAdmin(result.data.session);
 
   loginButton.disabled = false;
-
 });
 
 
@@ -119,14 +99,9 @@ logoutButton.addEventListener(
     await sb.auth.signOut();
 
     showLogin();
-
   }
 );
 
-
-/* =========================
-   로그인 상태 변화
-========================= */
 
 sb.auth.onAuthStateChange(
   function (_event, session) {
@@ -142,7 +117,7 @@ sb.auth.onAuthStateChange(
 
 
 /* =========================
-   띠부실 불러오기
+   포켓몬 목록 불러오기
 ========================= */
 
 async function loadStickers() {
@@ -155,12 +130,11 @@ async function loadStickers() {
         ascending: true
       });
 
-
   if (result.error) {
 
     document.getElementById("rows").innerHTML =
       `<tr>
-        <td colspan="5">
+        <td colspan="7">
           ${escapeHtml(result.error.message)}
         </td>
       </tr>`;
@@ -168,16 +142,14 @@ async function loadStickers() {
     return;
   }
 
-
   all = result.data || [];
 
   render();
-
 }
 
 
 /* =========================
-   목록 출력
+   목록 표시
 ========================= */
 
 function render() {
@@ -189,7 +161,6 @@ function render() {
       .trim()
       .toLowerCase();
 
-
   const list =
     all.filter(function (item) {
 
@@ -197,6 +168,9 @@ function render() {
         !search ||
         String(item.number).includes(search) ||
         (item.name || "")
+          .toLowerCase()
+          .includes(search) ||
+        (item.form || "")
           .toLowerCase()
           .includes(search)
       );
@@ -214,18 +188,26 @@ function render() {
       return `
         <tr>
 
-          <td>#${item.number}</td>
+          <td>
+            #${String(item.number).padStart(3, "0")}
+          </td>
 
           <td>
             ${escapeHtml(item.name || "")}
           </td>
 
           <td>
-            ${
-              item.status === "owned"
-                ? "보유"
-                : "구하는 중"
-            }
+            ${item.status === "owned"
+              ? "보유"
+              : "구하는 중"}
+          </td>
+
+          <td>
+            ${Number(item.quantity || 0)}개
+          </td>
+
+          <td>
+            ${escapeHtml(item.form || "일반")}
           </td>
 
           <td>
@@ -296,10 +278,6 @@ function render() {
 }
 
 
-/* =========================
-   검색
-========================= */
-
 document
   .getElementById("adminSearch")
   .addEventListener(
@@ -309,7 +287,7 @@ document
 
 
 /* =========================
-   모달 열기
+   추가 버튼
 ========================= */
 
 document
@@ -324,60 +302,93 @@ document
   );
 
 
+/* =========================
+   수정창
+========================= */
+
 function openModal(id) {
 
-  editingId = id || null;
+  editingId =
+    id || null;
 
 
   const item =
     all.find(function (x) {
 
-      return String(x.id) === String(id);
+      return String(x.id) ===
+        String(id);
 
     });
 
 
-  document.getElementById("modalTitle")
-    .textContent =
-      item
-        ? "띠부실 수정"
-        : "띠부실 추가";
+  document.getElementById(
+    "modalTitle"
+  ).textContent =
+    item
+      ? "띠부실 수정"
+      : "띠부실 추가";
 
 
-  document.getElementById("formNo")
-    .value =
-      item
-        ? item.number
-        : "";
+  document.getElementById(
+    "formNo"
+  ).value =
+    item
+      ? item.number
+      : "";
 
 
-  document.getElementById("formName")
-    .value =
-      item
-        ? item.name
-        : "";
+  document.getElementById(
+    "formName"
+  ).value =
+    item
+      ? item.name
+      : "";
 
 
-  document.getElementById("formStatus")
-    .value =
-      item
-        ? item.status
-        : "wanted";
+  document.getElementById(
+    "formStatus"
+  ).value =
+    item
+      ? item.status
+      : "wanted";
 
 
-  document.getElementById("formNote")
-    .value =
-      item
-        ? item.note || ""
-        : "";
+  document.getElementById(
+    "formNote"
+  ).value =
+    item
+      ? item.note || ""
+      : "";
 
 
-  document.getElementById("formMsg")
-    .textContent = "";
+  /*
+     새로 추가된 값
+  */
+
+  document.getElementById(
+    "formQuantity"
+  ).value =
+    item
+      ? Number(item.quantity || 0)
+      : 0;
 
 
-  document.getElementById("modal")
-    .hidden = false;
+  document.getElementById(
+    "formForm"
+  ).value =
+    item
+      ? item.form || "일반"
+      : "일반";
+
+
+  document.getElementById(
+    "formMsg"
+  ).textContent = "";
+
+
+  document.getElementById(
+    "modal"
+  ).hidden = false;
 
 }
 
@@ -392,8 +403,9 @@ document
     "click",
     function () {
 
-      document.getElementById("modal")
-        .hidden = true;
+      document.getElementById(
+        "modal"
+      ).hidden = true;
 
     }
   );
@@ -411,30 +423,48 @@ document
 
       const number =
         Number(
-          document.getElementById("formNo")
-            .value
+          document.getElementById(
+            "formNo"
+          ).value
         );
 
 
       const name =
-        document.getElementById("formName")
-          .value
-          .trim();
+        document.getElementById(
+          "formName"
+        ).value.trim();
 
 
       const status =
-        document.getElementById("formStatus")
-          .value;
+        document.getElementById(
+          "formStatus"
+        ).value;
 
 
       const note =
-        document.getElementById("formNote")
-          .value
-          .trim();
+        document.getElementById(
+          "formNote"
+        ).value.trim();
+
+
+      const quantity =
+        Number(
+          document.getElementById(
+            "formQuantity"
+          ).value
+        );
+
+
+      const form =
+        document.getElementById(
+          "formForm"
+        ).value.trim();
 
 
       const msg =
-        document.getElementById("formMsg");
+        document.getElementById(
+          "formMsg"
+        );
 
 
       if (!number || !name) {
@@ -446,7 +476,33 @@ document
       }
 
 
+      if (quantity < 0) {
+
+        msg.textContent =
+          "수량은 0개 이상으로 입력해줘";
+
+        return;
+      }
+
+
       let result;
+
+
+      const data = {
+
+        number: number,
+
+        name: name,
+
+        status: status,
+
+        note: note,
+
+        quantity: quantity,
+
+        form: form || "일반"
+
+      };
 
 
       if (editingId) {
@@ -454,32 +510,15 @@ document
         result =
           await sb
             .from("stickers")
-            .update({
-
-              number: number,
-              name: name,
-              status: status,
-              note: note
-
-            })
-            .eq(
-              "id",
-              editingId
-            );
+            .update(data)
+            .eq("id", editingId);
 
       } else {
 
         result =
           await sb
             .from("stickers")
-            .insert({
-
-              number: number,
-              name: name,
-              status: status,
-              note: note
-
-            });
+            .insert(data);
 
       }
 
@@ -493,8 +532,9 @@ document
       }
 
 
-      document.getElementById("modal")
-        .hidden = true;
+      document.getElementById(
+        "modal"
+      ).hidden = true;
 
 
       await loadStickers();
@@ -509,7 +549,11 @@ document
 
 async function deleteSticker(id) {
 
-  if (!confirm("정말 삭제할까?")) {
+  if (
+    !confirm(
+      "정말 삭제할까?"
+    )
+  ) {
     return;
   }
 
@@ -523,7 +567,9 @@ async function deleteSticker(id) {
 
   if (result.error) {
 
-    alert(result.error.message);
+    alert(
+      result.error.message
+    );
 
     return;
   }
@@ -535,14 +581,13 @@ async function deleteSticker(id) {
 
 
 /* =========================
-   HTML 문자 처리
+   HTML 보호
 ========================= */
 
 function escapeHtml(value) {
 
   return String(value).replace(
     /[&<>"']/g,
-
     function (char) {
 
       return {
@@ -562,236 +607,12 @@ function escapeHtml(value) {
 
 
 /* =========================
-   시작
+   초기화
 ========================= */
 
-document
-  .getElementById("modal")
-  .hidden = true;
+document.getElementById(
+  "modal"
+).hidden = true;
 
 
 checkLogin();
-/* =========================
-   전국도감 1~1025 자동 등록
-========================= */
-
-const pokemonLoadBtn = document.getElementById("pokemonLoadBtn");
-const pokemonLoadMsg = document.getElementById("pokemonLoadMsg");
-
-if (pokemonLoadBtn) {
-
-  pokemonLoadBtn.addEventListener("click", async function () {
-
-    const ok = confirm(
-      "전국도감 1~1025번을 자동으로 등록할까?\n\n" +
-      "이미 등록된 포켓몬은 건드리지 않고\n" +
-      "없는 포켓몬만 '구하는 중'으로 추가해."
-    );
-
-    if (!ok) return;
-
-    pokemonLoadBtn.disabled = true;
-
-    pokemonLoadMsg.textContent =
-      "기존 띠부실 목록을 확인하는 중...";
-
-    try {
-
-      /* 현재 등록된 번호 확인 */
-
-      const existingResult = await sb
-        .from("stickers")
-        .select("number");
-
-      if (existingResult.error) {
-        throw existingResult.error;
-      }
-
-      const existingNumbers = new Set(
-        (existingResult.data || []).map(
-          x => Number(x.number)
-        )
-      );
-
-
-      /* 포켓몬 목록 가져오기 */
-
-      pokemonLoadMsg.textContent =
-        "전국도감 정보를 가져오는 중...";
-
-      const listResponse = await fetch(
-        "https://pokeapi.co/api/v2/pokemon-species?limit=1025&offset=0"
-      );
-
-      if (!listResponse.ok) {
-        throw new Error(
-          "포켓몬 목록을 가져오지 못했어"
-        );
-      }
-
-      const listData =
-        await listResponse.json();
-
-
-      const pokemonList =
-        listData.results.map(
-          (pokemon, index) => ({
-            number: index + 1,
-            url: pokemon.url
-          })
-        );
-
-
-      const newPokemon = [];
-
-
-      /* 포켓몬 이름 가져오기 */
-
-      for (
-        let i = 0;
-        i < pokemonList.length;
-        i++
-      ) {
-
-        const pokemon =
-          pokemonList[i];
-
-
-        /* 이미 등록되어 있으면 건너뜀 */
-
-        if (
-          existingNumbers.has(
-            pokemon.number
-          )
-        ) {
-          continue;
-        }
-
-
-        const response =
-          await fetch(pokemon.url);
-
-
-        if (!response.ok) {
-          throw new Error(
-            `#${pokemon.number} 정보를 가져오지 못했어`
-          );
-        }
-
-
-        const data =
-          await response.json();
-
-
-        /* 한국어 이름 찾기 */
-
-        const koreanName =
-          data.names?.find(
-            x =>
-              x.language?.name === "ko"
-          );
-
-
-        const name =
-          koreanName?.name ||
-          data.name;
-
-
-        newPokemon.push({
-
-          number: pokemon.number,
-
-          name: name,
-
-          status: "wanted",
-
-          note: ""
-
-        });
-
-
-        pokemonLoadMsg.textContent =
-          `포켓몬 정보 가져오는 중... ${i + 1} / 1025`;
-
-      }
-
-
-      /* 새로 추가할 포켓몬이 없는 경우 */
-
-      if (newPokemon.length === 0) {
-
-        pokemonLoadMsg.textContent =
-          "이미 1~1025번이 전부 등록되어 있어.";
-
-        pokemonLoadBtn.disabled = false;
-
-        return;
-      }
-
-
-      /* 100마리씩 등록 */
-
-      const batchSize = 100;
-
-
-      for (
-        let i = 0;
-        i < newPokemon.length;
-        i += batchSize
-      ) {
-
-        const batch =
-          newPokemon.slice(
-            i,
-            i + batchSize
-          );
-
-
-        const result =
-          await sb
-            .from("stickers")
-            .insert(batch);
-
-
-        if (result.error) {
-          throw result.error;
-        }
-
-
-        pokemonLoadMsg.textContent =
-          `등록 중... ${
-            Math.min(
-              i + batch.length,
-              newPokemon.length
-            )
-          } / ${newPokemon.length}`;
-
-      }
-
-
-      pokemonLoadMsg.textContent =
-        `완료! ${newPokemon.length}마리가 등록됐어.`;
-
-
-      /* 관리자 목록 새로고침 */
-
-      await loadStickers();
-
-
-    } catch (error) {
-
-      console.error(error);
-
-      pokemonLoadMsg.textContent =
-        "등록 중 오류가 발생했어: " +
-        error.message;
-
-    } finally {
-
-      pokemonLoadBtn.disabled = false;
-
-    }
-
-  });
-
-}
