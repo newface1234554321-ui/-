@@ -1,517 +1,262 @@
-```javascript
-const sb = supabase.createClient(
-  window.SUPABASE_URL,
-  window.SUPABASE_ANON_KEY
-);
-
-const loginBox = document.querySelector("#loginBox");
-const manageBox = document.querySelector("#manageBox");
-const modal = document.querySelector("#modal");
-const logoutBtn = document.querySelector("#logout");
-
-let editing = null;
-let all = [];
-
-
-/* =========================
-   로그인
-========================= */
-
-async function init() {
-  const {
-    data: { session }
-  } = await sb.auth.getSession();
-
-  setLogged(session);
-
-  sb.auth.onAuthStateChange((_event, session) => {
-    setLogged(session);
-  });
-}
-
-function setLogged(session) {
-  if (session) {
-    loginBox.hidden = true;
-    manageBox.hidden = false;
-    logoutBtn.hidden = false;
-
-    load();
-  } else {
-    loginBox.hidden = false;
-    manageBox.hidden = true;
-    logoutBtn.hidden = true;
-
-    modal.hidden = true;
-  }
-}
-
-document.querySelector("#login").onclick = async () => {
-  const email = document.querySelector("#email").value.trim();
-  const password = document.querySelector("#password").value;
-  const msg = document.querySelector("#loginMsg");
-
-  if (!email || !password) {
-    msg.textContent = "이메일과 비밀번호를 입력해줘";
-    return;
-  }
-
-  msg.textContent = "로그인 중...";
-
-  const { data, error } = await sb.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    msg.textContent = error.message;
-    return;
-  }
-
-  if (data.session) {
-    msg.textContent = "로그인 완료";
-    setLogged(data.session);
-  }
-};
-
-
-/* =========================
-   로그아웃
-========================= */
-
-logoutBtn.onclick = async () => {
-  modal.hidden = true;
-  await sb.auth.signOut();
-};
-
-
-/* =========================
-   띠부실 불러오기
-========================= */
-
-async function load() {
-  const { data, error } = await sb
-    .from("stickers")
-    .select("*")
-    .order("number", { ascending: true });
-
-  if (error) {
-    document.querySelector("#rows").innerHTML =
-      `<tr><td colspan="5">${esc(error.message)}</td></tr>`;
-    return;
-  }
-
-  all = data || [];
-  render();
-}
-
-
-/* =========================
-   목록 표시
-========================= */
-
-function render() {
-  const q = document
-    .querySelector("#adminSearch")
-    .value
-    .trim()
-    .toLowerCase();
-
-  const list = all.filter(
-    x =>
-      !q ||
-      String(x.number).includes(q) ||
-      (x.name || "").toLowerCase().includes(q)
-  );
-
-  document.querySelector("#rows").innerHTML = list
-    .map(
-      x => `
-        <tr>
-          <td>#${x.number}</td>
-          <td>${esc(x.name || "")}</td>
-          <td>${x.status === "owned" ? "보유" : "구하는 중"}</td>
-          <td>${esc(x.note || "")}</td>
-          <td>
-            <button class="edit" data-id="${x.id}">수정</button>
-            <button class="delete" data-id="${x.id}">삭제</button>
-          </td>
-        </tr>
-      `
-    )
-    .join("");
-    
-  document.querySelectorAll(".edit").forEach(button => {
-    button.onclick = () => openEdit(button.dataset.id);
-  });
-
-  document.querySelectorAll(".delete").forEach(button => {
-    button.onclick = () => remove(button.dataset.id);
-  });
-}
-
-
-/* =========================
-   HTML 문자 보호
-========================= */
-
-function esc(value) {
-  return String(value).replace(
-    /[&<>"']/g,
-    m => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#039;"
-    })[m]
-  );
-}
-
-
-/* =========================
-   검색
-========================= */
-
-document.querySelector("#adminSearch").oninput = render;
-
-
-/* =========================
-   추가 / 수정 창
-========================= */
-
-document.querySelector("#addBtn").onclick = () => {
-  openEdit();
-};
-
-document.querySelector("#closeModal").onclick = () => {
-  modal.hidden = true;
-};
-
-modal.addEventListener("click", event => {
-  if (event.target === modal) {
-    modal.hidden = true;
-  }
-});
-
-
-function openEdit(id) {
-  editing = id || null;
-
-  const x = all.find(item => item.id === id);
-
-  document.querySelector("#modalTitle").textContent =
-    x ? "띠부실 수정" : "띠부실 추가";
-
-  document.querySelector("#formNo").value =
-    x?.number || "";
-
-  document.querySelector("#formName").value =
-    x?.name || "";
-
-  // 기존 포켓몬은 기존 상태 유지
-  // 새로 추가하는 포켓몬은 구하는 중
-  document.querySelector("#formStatus").value =
-    x?.status || "wanted";
-
-  document.querySelector("#formNote").value =
-    x?.note || "";
-
-  document.querySelector("#formMsg").textContent = "";
-
-  modal.hidden = false;
-}
-
-
-/* =========================
-   저장
-========================= */
-
-document.querySelector("#saveBtn").onclick = async () => {
-  const payload = {
-    number: Number(
-      document.querySelector("#formNo").value
-    ),
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-    name: document
-      .querySelector("#formName")
-      .value
-      .trim(),
-
-    status: document
-      .querySelector("#formStatus")
-      .value,
-
-    note: document
-      .querySelector("#formNote")
-      .value
-      .trim()
-  };
-
-  const msg = document.querySelector("#formMsg");
-
-  if (!payload.number || !payload.name) {
-    msg.textContent = "번호와 이름을 입력해줘";
-    return;
-  }
+<title>관리자 - 띠부실 컬렉션</title>
 
-  const q = editing
-    ? sb
-        .from("stickers")
-        .update(payload)
-        .eq("id", editing)
-    : sb
-        .from("stickers")
-        .insert(payload);
+<link rel="stylesheet" href="style.css">
 
-  const { error } = await q;
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script defer src="admin.js"></script>
 
-  if (error) {
-    msg.textContent = error.message;
-    return;
-  }
-
-  modal.hidden = true;
-
-  await load();
-};
-
-
-/* =========================
-   삭제
-========================= */
+</head>
 
-async function remove(id) {
-  if (!confirm("정말 삭제할까?")) {
-    return;
-  }
-
-  const { error } = await sb
-    .from("stickers")
-    .delete()
-    .eq("id", id);
+<body>
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  await load();
-}
-
-
-/* =========================
-   전국도감 1~1026 자동 등록
-========================= */
-
-document.querySelector("#pokemonLoadBtn").onclick = async () => {
-
-  const button =
-    document.querySelector("#pokemonLoadBtn");
-
-  const msg =
-    document.querySelector("#pokemonLoadMsg");
-
-  const ok = confirm(
-    "전국도감 1~1026번을 자동으로 등록할까?\n\n" +
-    "이미 등록된 포켓몬은 건드리지 않고\n" +
-    "없는 포켓몬만 '구하는 중'으로 추가해."
-  );
-
-  if (!ok) {
-    return;
-  }
-
-  button.disabled = true;
-
-  msg.textContent =
-    "전국도감 정보를 가져오는 중...";
-
-  try {
-
-    /* 현재 등록된 번호 확인 */
-
-    const {
-      data: existing,
-      error: existingError
-    } = await sb
-      .from("stickers")
-      .select("number");
-
-    if (existingError) {
-      throw existingError;
-    }
-
-    const existingNumbers =
-      new Set(
-        (existing || []).map(
-          x => Number(x.number)
-        )
-      );
+<header class="top">
 
+  <div class="wrap nav">
 
-    /* PokéAPI에서 1~1026 목록 가져오기 */
+    <a class="brand" href="index.html">
+      띠부실 <span>COLLECTION</span>
+    </a>
 
-    const listResponse = await fetch(
-      "https://pokeapi.co/api/v2/pokemon-species?limit=1026&offset=0"
-    );
+    <button id="logout" class="ghost" hidden>
+      로그아웃
+    </button>
 
-    if (!listResponse.ok) {
-      throw new Error(
-        "포켓몬 목록을 가져오지 못했어"
-      );
-    }
+  </div>
 
-    const listData =
-      await listResponse.json();
+</header>
 
-    const pokemonList =
-      listData.results
-        .map((x, index) => ({
-          number: index + 1,
-          url: x.url
-        }))
-        .filter(
-          x => x.number <= 1026
-        );
 
+<main class="wrap admin">
 
-    /* 없는 포켓몬만 가져오기 */
-
-    const newPokemon = [];
-
-    for (
-      let i = 0;
-      i < pokemonList.length;
-      i++
-    ) {
 
-      const pokemon =
-        pokemonList[i];
-
-      if (
-        existingNumbers.has(
-          pokemon.number
-        )
-      ) {
-        continue;
-      }
+<!-- 로그인 -->
 
-      const response =
-        await fetch(pokemon.url);
+<section id="loginBox" class="panel">
 
-      if (!response.ok) {
-        throw new Error(
-          `#${pokemon.number} 데이터를 가져오지 못했어`
-        );
-      }
+  <h1>관리자 로그인</h1>
 
-      const data =
-        await response.json();
+  <p>
+    관리자 계정으로 로그인하면
+    띠부실 목록을 관리할 수 있습니다.
+  </p>
 
-      const koreanName =
-        data.names?.find(
-          x =>
-            x.language?.name === "ko"
-        );
+  <input
+    id="email"
+    type="email"
+    placeholder="관리자 이메일"
+  >
 
-      const name =
-        koreanName?.name ||
-        data.name;
+  <input
+    id="password"
+    type="password"
+    placeholder="비밀번호"
+  >
 
-      newPokemon.push({
-        number: pokemon.number,
-        name: name,
-        status: "wanted",
-        note: ""
-      });
+  <button
+    id="login"
+    class="primary"
+    type="button"
+  >
+    로그인
+  </button>
 
-      msg.textContent =
-        `포켓몬 이름을 가져오는 중... ${
-          i + 1
-        } / ${pokemonList.length}`;
-    }
+  <p id="loginMsg" class="msg"></p>
 
+</section>
 
-    /* 이미 전부 등록되어 있는 경우 */
 
-    if (newPokemon.length === 0) {
+<!-- 관리자 화면 -->
 
-      msg.textContent =
-        "이미 모든 포켓몬이 등록되어 있어.";
+<section id="manageBox" hidden>
 
-      button.disabled = false;
+  <div class="admin-head">
 
-      return;
-    }
+    <div>
 
+      <p class="eyebrow">
+        ADMIN
+      </p>
 
-    /* Supabase에 100개씩 등록 */
+      <h1>
+        띠부실 관리
+      </h1>
 
-    const batchSize = 100;
+    </div>
 
-    for (
-      let i = 0;
-      i < newPokemon.length;
-      i += batchSize
-    ) {
 
-      const batch =
-        newPokemon.slice(
-          i,
-          i + batchSize
-        );
+    <div>
 
-      const { error } =
-        await sb
-          .from("stickers")
-          .insert(batch);
+      <button
+        id="pokemonLoadBtn"
+        class="primary"
+        type="button"
+      >
+        전국도감 자동 등록
+      </button>
 
-      if (error) {
-        throw error;
-      }
 
-      msg.textContent =
-        `${
-          Math.min(
-            i + batch.length,
-            newPokemon.length
-          )
-        } / ${
-          newPokemon.length
-        }마리 등록 완료`;
-    }
+      <button
+        id="addBtn"
+        class="primary"
+        type="button"
+      >
+        + 띠부실 추가
+      </button>
 
+    </div>
 
-    /* 완료 */
+  </div>
 
-    msg.textContent =
-      `완료! ${
-        newPokemon.length
-      }마리를 등록했어.`;
 
-    await load();
+  <p
+    id="pokemonLoadMsg"
+    class="msg"
+  ></p>
 
-  } catch (error) {
 
-    console.error(error);
+  <div class="panel">
 
-    msg.textContent =
-      "등록 중 오류가 발생했어: " +
-      error.message;
+    <input
+      id="adminSearch"
+      placeholder="번호 또는 이름 검색"
+    >
 
-  } finally {
 
-    button.disabled = false;
+    <div class="table-wrap">
 
-  }
-};
+      <table>
 
+        <thead>
 
-/* =========================
-   시작
-========================= */
+          <tr>
+            <th>번호</th>
+            <th>이름</th>
+            <th>상태</th>
+            <th>메모</th>
+            <th></th>
+          </tr>
 
-modal.hidden = true;
+        </thead>
 
-init();
-```
+
+        <tbody id="rows"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- 추가 / 수정 창 -->
+
+<div
+  id="modal"
+  class="modal"
+  hidden
+>
+
+  <div class="modal-card">
+
+    <button
+      id="closeModal"
+      class="close"
+      type="button"
+    >
+      ×
+    </button>
+
+
+    <h2 id="modalTitle">
+      띠부실 추가
+    </h2>
+
+
+    <label>
+
+      번호
+
+      <input
+        id="formNo"
+        type="number"
+        min="1"
+      >
+
+    </label>
+
+
+    <label>
+
+      포켓몬 이름
+
+      <input
+        id="formName"
+        placeholder="예: 피카츄"
+      >
+
+    </label>
+
+
+    <label>
+
+      상태
+
+      <select id="formStatus">
+
+        <option value="wanted">
+          구하는 중
+        </option>
+
+        <option value="owned">
+          보유
+        </option>
+
+      </select>
+
+    </label>
+
+
+    <label>
+
+      메모
+
+      <textarea
+        id="formNote"
+        placeholder="교환 가능, 미개봉 등"
+      ></textarea>
+
+    </label>
+
+
+    <button
+      id="saveBtn"
+      class="primary"
+      type="button"
+    >
+      저장
+    </button>
+
+
+    <p
+      id="formMsg"
+      class="msg"
+    ></p>
+
+  </div>
+
+</div>
+
+
+</main>
+
+</body>
+</html>
