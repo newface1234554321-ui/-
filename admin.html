@@ -22,7 +22,12 @@
       띠부실 <span>COLLECTION</span>
     </a>
 
-    <button id="logout" class="ghost" hidden>
+    <button
+      id="logout"
+      class="ghost"
+      hidden
+      type="button"
+    >
       로그아웃
     </button>
 
@@ -32,7 +37,8 @@
 
 <main class="wrap admin">
 
-  <!-- 로그인 화면 -->
+  <!-- 관리자 로그인 -->
+
   <section id="loginBox" class="panel">
 
     <h1>관리자 로그인</h1>
@@ -62,20 +68,35 @@
       로그인
     </button>
 
-    <p id="loginMsg" class="msg"></p>
+    <p
+      id="loginMsg"
+      class="msg"
+    ></p>
 
   </section>
 
 
-  <!-- 관리자 화면 -->
-  <section id="manageBox" hidden>
+  <!-- 관리자 관리 화면 -->
+
+  <section
+    id="manageBox"
+    hidden
+  >
 
     <div class="admin-head">
 
       <div>
-        <p class="eyebrow">ADMIN</p>
-        <h1>띠부실 관리</h1>
+
+        <p class="eyebrow">
+          ADMIN
+        </p>
+
+        <h1>
+          띠부실 관리
+        </h1>
+
       </div>
+
 
       <div>
 
@@ -86,6 +107,7 @@
         >
           전국도감 자동 등록
         </button>
+
 
         <button
           id="addBtn"
@@ -100,29 +122,38 @@
     </div>
 
 
-    <p id="pokemonLoadMsg" class="msg"></p>
+    <p
+      id="pokemonLoadMsg"
+      class="msg"
+    ></p>
 
 
     <div class="panel">
 
       <input
         id="adminSearch"
-        placeholder="번호 또는 이름 검색"
+        placeholder="번호 또는 포켓몬 이름 검색"
       >
+
 
       <div class="table-wrap">
 
         <table>
 
           <thead>
+
             <tr>
+
               <th>번호</th>
               <th>이름</th>
               <th>상태</th>
               <th>메모</th>
               <th></th>
+
             </tr>
+
           </thead>
+
 
           <tbody id="rows"></tbody>
 
@@ -135,8 +166,13 @@
   </section>
 
 
-  <!-- 추가 / 수정 모달 -->
-  <div id="modal" class="modal" hidden>
+  <!-- 띠부실 추가 / 수정 -->
+
+  <div
+    id="modal"
+    class="modal"
+    hidden
+  >
 
     <div class="modal-card">
 
@@ -148,36 +184,59 @@
         ×
       </button>
 
-      <h2 id="modalTitle">띠부실 추가</h2>
+
+      <h2 id="modalTitle">
+        띠부실 추가
+      </h2>
+
 
       <label>
+
         번호
+
         <input
           id="formNo"
           type="number"
           min="1"
         >
+
       </label>
 
+
       <label>
+
         포켓몬 이름
+
         <input
           id="formName"
+          type="text"
           placeholder="예: 피카츄"
         >
+
       </label>
 
+
       <label>
+
         상태
 
         <select id="formStatus">
-          <option value="wanted">구하는 중</option>
-          <option value="owned">보유</option>
+
+          <option value="wanted">
+            구하는 중
+          </option>
+
+          <option value="owned">
+            보유
+          </option>
+
         </select>
 
       </label>
 
+
       <label>
+
         메모
 
         <textarea
@@ -187,6 +246,7 @@
 
       </label>
 
+
       <button
         id="saveBtn"
         class="primary"
@@ -195,7 +255,11 @@
         저장
       </button>
 
-      <p id="formMsg" class="msg"></p>
+
+      <p
+        id="formMsg"
+        class="msg"
+      ></p>
 
     </div>
 
