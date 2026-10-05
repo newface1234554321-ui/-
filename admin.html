@@ -22,12 +22,7 @@
       띠부실 <span>COLLECTION</span>
     </a>
 
-    <button
-      id="logout"
-      class="ghost"
-      hidden
-      type="button"
-    >
+    <button id="logout" class="ghost" hidden type="button">
       로그아웃
     </button>
 
@@ -37,7 +32,7 @@
 
 <main class="wrap admin">
 
-  <!-- 관리자 로그인 -->
+  <!-- 로그인 -->
 
   <section id="loginBox" class="panel">
 
@@ -68,20 +63,14 @@
       로그인
     </button>
 
-    <p
-      id="loginMsg"
-      class="msg"
-    ></p>
+    <p id="loginMsg" class="msg"></p>
 
   </section>
 
 
-  <!-- 관리자 관리 화면 -->
+  <!-- 관리자 -->
 
-  <section
-    id="manageBox"
-    hidden
-  >
+  <section id="manageBox" hidden>
 
     <div class="admin-head">
 
@@ -91,9 +80,7 @@
           ADMIN
         </p>
 
-        <h1>
-          띠부실 관리
-        </h1>
+        <h1>띠부실 관리</h1>
 
       </div>
 
@@ -108,7 +95,6 @@
           전국도감 자동 등록
         </button>
 
-
         <button
           id="addBtn"
           class="primary"
@@ -122,10 +108,7 @@
     </div>
 
 
-    <p
-      id="pokemonLoadMsg"
-      class="msg"
-    ></p>
+    <p id="pokemonLoadMsg" class="msg"></p>
 
 
     <div class="panel">
@@ -143,13 +126,13 @@
           <thead>
 
             <tr>
-
               <th>번호</th>
               <th>이름</th>
               <th>상태</th>
+              <th>수량</th>
+              <th>폼</th>
               <th>메모</th>
               <th></th>
-
             </tr>
 
           </thead>
@@ -166,13 +149,9 @@
   </section>
 
 
-  <!-- 띠부실 추가 / 수정 -->
+  <!-- 추가 / 수정 창 -->
 
-  <div
-    id="modal"
-    class="modal"
-    hidden
-  >
+  <div id="modal" class="modal" hidden>
 
     <div class="modal-card">
 
@@ -237,6 +216,34 @@
 
       <label>
 
+        보유 수량
+
+        <input
+          id="formQuantity"
+          type="number"
+          min="0"
+          value="0"
+        >
+
+      </label>
+
+
+      <label>
+
+        폼 / 형태
+
+        <input
+          id="formForm"
+          type="text"
+          placeholder="예: 일반, 알로라, 히스이, 거다이맥스"
+          value="일반"
+        >
+
+      </label>
+
+
+      <label>
+
         메모
 
         <textarea
@@ -256,10 +263,7 @@
       </button>
 
 
-      <p
-        id="formMsg"
-        class="msg"
-      ></p>
+      <p id="formMsg" class="msg"></p>
 
     </div>
 
