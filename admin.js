@@ -34,7 +34,6 @@ function setLogged(session) {
     loginBox.hidden = false;
     manageBox.hidden = true;
     logoutBtn.hidden = true;
-
     modal.hidden = true;
   }
 }
@@ -152,8 +151,6 @@ function openEdit(id) {
   document.querySelector("#formNo").value = x?.number || "";
   document.querySelector("#formName").value = x?.name || "";
 
-  // 기존 띠부실 수정 시에는 기존 상태 유지
-  // 새 띠부실 추가 시에는 "구하는 중"을 기본값으로 설정
   document.querySelector("#formStatus").value =
     x?.status || "wanted";
 
@@ -206,6 +203,148 @@ async function remove(id) {
     load();
   }
 }
+
+
+/* =========================
+   전국도감 1~1026 자동 등록
+   ========================= */
+
+document.querySelector("#pokemonLoadBtn").onclick = async () => {
+
+  const msg = document.querySelector("#pokemonLoadMsg");
+  const button = document.querySelector("#pokemonLoadBtn");
+
+  const ok = confirm(
+    "전국도감 1~1026번을 자동으로 등록할까?\n\n" +
+    "이미 등록된 포켓몬은 건드리지 않고\n" +
+    없는 포켓몬만 '구하는 중'으로 추가해."
+  );
+
+  if (!ok) return;
+
+  button.disabled = true;
+  msg.textContent = "전국도감 정보를 가져오는 중...";
+
+  try {
+
+    const { data: existing, error: existingError } = await sb
+      .from("stickers")
+      .select("number");
+
+    if (existingError) {
+      throw existingError;
+    }
+
+    const existingNumbers = new Set(
+      (existing || []).map(x => Number(x.number))
+    );
+
+    const listResponse = await fetch(
+      "https://pokeapi.co/api/v2/pokemon-species?limit=1026&offset=0"
+    );
+
+    if (!listResponse.ok) {
+      throw new Error("포켓몬 데이터를 가져오지 못했어");
+    }
+
+    const listData = await listResponse.json();
+
+    const pokemon = listData.results
+      .map((x, index) => ({
+        number: index + 1,
+        url: x.url
+      }))
+      .filter(x => x.number <= 1026);
+
+    msg.textContent =
+      `포켓몬 이름을 가져오는 중... 0 / ${pokemon.length}`;
+
+    const newPokemon = [];
+
+    for (let i = 0; i < pokemon.length; i++) {
+
+      const p = pokemon[i];
+
+      if (existingNumbers.has(p.number)) {
+        continue;
+      }
+
+      const response = await fetch(p.url);
+
+      if (!response.ok) {
+        throw new Error(`#${p.number} 데이터를 가져오지 못했어`);
+      }
+
+      const data = await response.json();
+
+      const koreanName = data.names?.find(
+        x => x.language?.name === "ko"
+      );
+
+      const name =
+        koreanName?.name ||
+        data.name;
+
+      newPokemon.push({
+        number: p.number,
+        name: name,
+        status: "wanted",
+        note: ""
+      });
+
+      msg.textContent =
+        `포켓몬 이름을 가져오는 중... ${i + 1} / ${pokemon.length}`;
+    }
+
+    if (newPokemon.length === 0) {
+      msg.textContent = "이미 모든 포켓몬이 등록되어 있어.";
+      button.disabled = false;
+      return;
+    }
+
+    msg.textContent =
+      `${newPokemon.length}마리를 등록하는 중...`;
+
+    const batchSize = 100;
+
+    for (let i = 0; i < newPokemon.length; i += batchSize) {
+
+      const batch = newPokemon.slice(i, i + batchSize);
+
+      const { error } = await sb
+        .from("stickers")
+        .insert(batch);
+
+      if (error) {
+        throw error;
+      }
+
+      msg.textContent =
+        `${Math.min(
+          i + batch.length,
+          newPokemon.length
+        )} / ${newPokemon.length}마리 등록 완료`;
+    }
+
+    msg.textContent =
+      `완료! ${newPokemon.length}마리를 등록했어.`;
+
+    await load();
+
+  } catch (error) {
+
+    console.error(error);
+
+    msg.textContent =
+      "등록 중 오류가 발생했어: " + error.message;
+
+  } finally {
+
+    button.disabled = false;
+
+  }
+};
+
 
 modal.hidden = true;
 
