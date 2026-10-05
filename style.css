@@ -488,3 +488,113 @@ flex: 1;
 }
 
 }
+/* =========================
+   메인 띠부실 카드 디자인
+========================= */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.card {
+  position: relative;
+  padding: 20px;
+  border: 1px solid #dfeadf;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 5px 18px rgba(65, 120, 65, 0.08);
+  transition: 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(65, 120, 65, 0.14);
+}
+
+.card .num {
+  font-size: 13px;
+  font-weight: 700;
+  color: #75a475;
+  margin-bottom: 7px;
+}
+
+.card .name {
+  font-size: 20px;
+  font-weight: 800;
+  color: #222222;
+  margin-bottom: 14px;
+}
+
+.card-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.card .badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.card .badge.owned {
+  background: #e7f7e7;
+  color: #3d8a4b;
+}
+
+.card .badge.wanted {
+  background: #f3f3f3;
+  color: #777777;
+}
+
+.card .quantity {
+  font-size: 13px;
+  font-weight: 700;
+  color: #555555;
+}
+
+.card .form {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 9px;
+  background: #f1f8ef;
+  color: #5f8d5f;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* 모바일 */
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .card {
+    padding: 15px;
+    border-radius: 15px;
+  }
+
+  .card .name {
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 400px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
