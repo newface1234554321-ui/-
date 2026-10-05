@@ -1,3 +1,4 @@
+```js
 const sb = supabase.createClient(
   window.SUPABASE_URL,
   window.SUPABASE_ANON_KEY
@@ -34,7 +35,6 @@ function setLogged(session) {
     manageBox.hidden = true;
     logoutBtn.hidden = true;
 
-    // 로그인하지 않은 상태에서는 추가창을 무조건 닫음
     modal.hidden = true;
   }
 }
@@ -127,7 +127,6 @@ function esc(value) {
 
 document.querySelector("#adminSearch").oninput = render;
 
-// 추가 버튼을 눌렀을 때만 창을 열음
 document.querySelector("#addBtn").onclick = () => {
   openEdit();
 };
@@ -152,7 +151,12 @@ function openEdit(id) {
 
   document.querySelector("#formNo").value = x?.number || "";
   document.querySelector("#formName").value = x?.name || "";
-  document.querySelector("#formStatus").value = x?.status || "owned";
+
+  // 기존 띠부실 수정 시에는 기존 상태 유지
+  // 새 띠부실 추가 시에는 "구하는 중"을 기본값으로 설정
+  document.querySelector("#formStatus").value =
+    x?.status || "wanted";
+
   document.querySelector("#formNote").value = x?.note || "";
   document.querySelector("#formMsg").textContent = "";
 
@@ -203,7 +207,7 @@ async function remove(id) {
   }
 }
 
-// 페이지가 열리자마자 추가창이 뜨지 않도록 강제로 닫고 시작
 modal.hidden = true;
 
 init();
+```
