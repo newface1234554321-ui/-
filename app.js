@@ -5,8 +5,8 @@ const sb = supabase.createClient(
 
 let all = [];
 
-const grid = document.querySelector("#grid");
-const empty = document.querySelector("#empty");
+const grid = document.getElementById("grid");
+const empty = document.getElementById("empty");
 
 async function load() {
   const { data, error } = await sb
@@ -15,9 +15,9 @@ async function load() {
     .order("number", { ascending: true });
 
   if (error) {
+    console.error(error);
     empty.hidden = false;
-    empty.textContent =
-      "데이터를 불러오지 못했습니다. config.js 설정을 확인하세요.";
+    empty.textContent = "데이터를 불러오지 못했습니다.";
     return;
   }
 
@@ -27,89 +27,103 @@ async function load() {
 
 function render() {
   const q = document
-    .querySelector("#search")
+    .getElementById("search")
     .value
     .trim()
     .toLowerCase();
 
-  const s = document.querySelector("#status").value;
+  const status = document.getElementById("status").value;
 
-  const list = all.filter(
-    (x) =>
-      (s === "all" || x.status === s) &&
+  const list = all.filter(function (item) {
+    return (
+      (status === "all" || item.status === status) &&
       (
         !q ||
-        String(x.number).includes(q) ||
-        (x.name || "").toLowerCase().includes(q) ||
-        (x.form || "").toLowerCase().includes(q)
+        String(item.number).includes(q) ||
+        (item.name || "").toLowerCase().includes(q) ||
+        (item.form || "").toLowerCase().includes(q)
       )
-  );
+    );
+  });
 
-  document.querySelector("#ownedCount").textContent =
-    all.filter((x) => x.status === "owned").length;
+  const ownedCount = all.filter(function (item) {
+    return item.status === "owned";
+  }).length;
 
-  document.querySelector("#wantedCount").textContent =
-    all.filter((x) => x.status === "wanted").length;
+  const wantedCount = all.filter(function (item) {
+    return item.status === "wanted";
+  }).length;
+
+  document.getElementById("ownedCount").textContent =
+    ownedCount;
+
+  document.getElementById("wantedCount").textContent =
+    wantedCount;
 
   grid.innerHTML = list
-    .map((x) => {
-      const statusText =
-        x.status === "owned" ? "보유" : "구하는 중";
+    .map(function (item) {
+      const number = String(item.number).padStart(3, "0");
+      const name = escapeHtml(item.name || "이름 미등록");
+      const quantity = Number(item.quantity || 0);
+      const form = escapeHtml(item.form || "일반");
 
-      const quantity = Number(x.quantity || 0);
-      const form = x.form || "일반";
+      const statusText =
+        item.status === "owned"
+          ? "보유"
+          : "구하는 중";
 
       return `
         <article class="card">
+
           <div class="num">
-            #${String(x.number).padStart(3, "0")}
+            #${number}
           </div>
 
           <div class="name">
-            ${escapeHtml(x.name || "이름 미등록")}
+            ${name}
           </div>
 
-          <div class="card-info">
-            <span class="badge ${x.status}">
-              ${statusText}
-            </span>
+          <div class="badge ${item.status}">
+            ${statusText}
+          </div>
 
-            <span class="quantity">
-              ${quantity}개
-            </span>
+          <div class="quantity">
+            수량 ${quantity}개
           </div>
 
           <div class="form">
-            ${escapeHtml(form)}
+            폼 ${form}
           </div>
+
         </article>
       `;
     })
     .join("");
 
-  empty.hidden = list.length > 0;
+  empty.hidden = list.length !== 0;
 }
 
 function escapeHtml(value) {
   return String(value).replace(
     /[&<>"']/g,
-    (m) =>
-      ({
+    function (char) {
+      return {
         "&": "&amp;",
         "<": "&lt;",
         ">": "&gt;",
         '"': "&quot;",
         "'": "&#039;"
-      })[m]
+      }[char];
+    }
   );
 }
 
 document
-  .querySelector("#search")
+  .getElementById("search")
   .addEventListener("input", render);
 
 document
-  .querySelector("#status")
+  .getElementById("status")
   .addEventListener("change", render);
 
 load();
