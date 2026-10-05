@@ -1,5 +1,7 @@
 <!doctype html>
+
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -9,267 +11,348 @@
   <link rel="stylesheet" href="style.css">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script src="config.js"></script>
+
   <script defer src="admin.js"></script>
+
 </head>
 
 <body>
 
 <header class="top">
+
   <div class="wrap nav">
 
-    <a class="brand" href="index.html">
-      띠부실 <span>COLLECTION</span>
-    </a>
+```
+<a class="brand" href="index.html">
+  띠부실 <span>COLLECTION</span>
+</a>
 
-    <button id="logout" class="ghost" hidden type="button">
-      로그아웃
-    </button>
+<button
+  id="logout"
+  class="ghost"
+  hidden
+  type="button"
+>
+  로그아웃
+</button>
+```
 
   </div>
-</header>
 
+</header>
 
 <main class="wrap admin">
 
-  <!-- 로그인 -->
+  <!-- =========================
+       로그인
+  ========================== -->
 
-  <section id="loginBox" class="panel">
+  <section
+    id="loginBox"
+    class="panel"
+  >
 
-    <h1>관리자 로그인</h1>
+```
+<h1>관리자 로그인</h1>
 
-    <p>
-      관리자 계정으로 로그인하면
-      띠부실 목록을 관리할 수 있습니다.
+<p>
+  관리자 계정으로 로그인하면
+  띠부실 목록을 관리할 수 있습니다.
+</p>
+
+<input
+  id="email"
+  type="email"
+  placeholder="관리자 이메일"
+>
+
+<input
+  id="password"
+  type="password"
+  placeholder="비밀번호"
+>
+
+<button
+  id="login"
+  class="primary"
+  type="button"
+>
+  로그인
+</button>
+
+<p
+  id="loginMsg"
+  class="msg"
+></p>
+```
+
+  </section>
+
+  <!-- =========================
+       관리자 화면
+  ========================== -->
+
+  <section
+    id="manageBox"
+    hidden
+  >
+
+```
+<div class="admin-head">
+
+  <div>
+
+    <p class="eyebrow">
+      ADMIN
     </p>
 
-    <input
-      id="email"
-      type="email"
-      placeholder="관리자 이메일"
-    >
+    <h1>
+      띠부실 관리
+    </h1>
 
-    <input
-      id="password"
-      type="password"
-      placeholder="비밀번호"
-    >
+  </div>
+
+
+  <div>
 
     <button
-      id="login"
+      id="pokemonLoadBtn"
       class="primary"
       type="button"
     >
-      로그인
+      전국도감 자동 등록
     </button>
 
-    <p id="loginMsg" class="msg"></p>
+    <button
+      id="addBtn"
+      class="primary"
+      type="button"
+    >
+      + 띠부실 추가
+    </button>
+
+  </div>
+
+</div>
+
+
+<p
+  id="pokemonLoadMsg"
+  class="msg"
+></p>
+
+
+<div class="panel">
+
+  <input
+    id="adminSearch"
+    placeholder="번호 또는 포켓몬 이름 검색"
+  >
+
+
+  <div class="table-wrap">
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>
+            번호
+          </th>
+
+          <th>
+            이름
+          </th>
+
+          <th>
+            상태
+          </th>
+
+          <th>
+            수량
+          </th>
+
+          <th>
+            폼
+          </th>
+
+          <th>
+            메모
+          </th>
+
+          <th>
+            관리
+          </th>
+
+        </tr>
+
+      </thead>
+
+
+      <tbody id="rows"></tbody>
+
+    </table>
+
+  </div>
+
+</div>
+```
 
   </section>
 
+  <!-- =========================
+       추가 / 수정 모달
+  ========================== -->
 
-  <!-- 관리자 -->
+  <div
+    id="modal"
+    class="modal"
+    hidden
+  >
 
-  <section id="manageBox" hidden>
+```
+<div class="modal-card">
 
-    <div class="admin-head">
 
-      <div>
+  <button
+    id="closeModal"
+    class="close"
+    type="button"
+  >
+    ×
+  </button>
 
-        <p class="eyebrow">
-          ADMIN
-        </p>
 
-        <h1>띠부실 관리</h1>
+  <h2 id="modalTitle">
+    띠부실 추가
+  </h2>
 
-      </div>
 
+  <!-- 번호 -->
 
-      <div>
+  <label>
 
-        <button
-          id="pokemonLoadBtn"
-          class="primary"
-          type="button"
-        >
-          전국도감 자동 등록
-        </button>
+    번호
 
-        <button
-          id="addBtn"
-          class="primary"
-          type="button"
-        >
-          + 띠부실 추가
-        </button>
+    <input
+      id="formNo"
+      type="number"
+      min="1"
+      placeholder="예: 25"
+    >
 
-      </div>
+  </label>
 
-    </div>
 
+  <!-- 이름 -->
 
-    <p id="pokemonLoadMsg" class="msg"></p>
+  <label>
 
+    포켓몬 이름
 
-    <div class="panel">
+    <input
+      id="formName"
+      type="text"
+      placeholder="예: 피카츄"
+    >
 
-      <input
-        id="adminSearch"
-        placeholder="번호 또는 포켓몬 이름 검색"
-      >
+  </label>
 
 
-      <div class="table-wrap">
+  <!-- 상태 -->
 
-        <table>
+  <label>
 
-          <thead>
+    상태
 
-            <tr>
-              <th>번호</th>
-              <th>이름</th>
-              <th>상태</th>
-              <th>수량</th>
-              <th>폼</th>
-              <th>메모</th>
-              <th></th>
-            </tr>
+    <select id="formStatus">
 
-          </thead>
+      <option value="wanted">
+        구하는 중
+      </option>
 
+      <option value="owned">
+        보유
+      </option>
 
-          <tbody id="rows"></tbody>
+    </select>
 
-        </table>
+  </label>
 
-      </div>
 
-    </div>
+  <!-- 수량 -->
 
-  </section>
+  <label>
 
+    보유 수량
 
-  <!-- 추가 / 수정 창 -->
+    <input
+      id="formQuantity"
+      type="number"
+      min="0"
+      value="0"
+      placeholder="예: 2"
+    >
 
-  <div id="modal" class="modal" hidden>
+  </label>
 
-    <div class="modal-card">
 
-      <button
-        id="closeModal"
-        class="close"
-        type="button"
-      >
-        ×
-      </button>
+  <!-- 폼 -->
 
+  <label>
 
-      <h2 id="modalTitle">
-        띠부실 추가
-      </h2>
+    폼 / 형태
 
+    <input
+      id="formForm"
+      type="text"
+      value="일반"
+      placeholder="예: 일반, 알로하, 히스이, 거다이맥스"
+    >
 
-      <label>
+  </label>
 
-        번호
 
-        <input
-          id="formNo"
-          type="number"
-          min="1"
-        >
+  <!-- 메모 -->
 
-      </label>
+  <label>
 
+    메모
 
-      <label>
+    <textarea
+      id="formNote"
+      placeholder="교환 가능, 미개봉 등"
+    ></textarea>
 
-        포켓몬 이름
+  </label>
 
-        <input
-          id="formName"
-          type="text"
-          placeholder="예: 피카츄"
-        >
 
-      </label>
+  <button
+    id="saveBtn"
+    class="primary"
+    type="button"
+  >
+    저장
+  </button>
 
 
-      <label>
+  <p
+    id="formMsg"
+    class="msg"
+  ></p>
 
-        상태
 
-        <select id="formStatus">
-
-          <option value="wanted">
-            구하는 중
-          </option>
-
-          <option value="owned">
-            보유
-          </option>
-
-        </select>
-
-      </label>
-
-
-      <label>
-
-        보유 수량
-
-        <input
-          id="formQuantity"
-          type="number"
-          min="0"
-          value="0"
-        >
-
-      </label>
-
-
-      <label>
-
-        폼 / 형태
-
-        <input
-          id="formForm"
-          type="text"
-          placeholder="예: 일반, 알로라, 히스이, 거다이맥스"
-          value="일반"
-        >
-
-      </label>
-
-
-      <label>
-
-        메모
-
-        <textarea
-          id="formNote"
-          placeholder="교환 가능, 미개봉 등"
-        ></textarea>
-
-      </label>
-
-
-      <button
-        id="saveBtn"
-        class="primary"
-        type="button"
-      >
-        저장
-      </button>
-
-
-      <p id="formMsg" class="msg"></p>
-
-    </div>
+</div>
+```
 
   </div>
 
 </main>
 
 </body>
+
 </html>
