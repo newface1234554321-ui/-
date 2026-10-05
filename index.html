@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>띠부실 컬렉션</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script defer src="app.js"></script>
+</head>
+<body>
+<header class="top"><div class="wrap nav"><div class="brand">띠부실 <span>COLLECTION</span></div><a class="admin-link" href="admin.html">관리자</a></div></header>
+<main class="wrap">
+<section class="hero">
+  <div><p class="eyebrow">POKÉMON STICKER COLLECTION</p><h1>보유 띠부실을<br><b>한눈에 확인하세요</b></h1><p class="sub">현재 보유 중인 띠부실과 찾고 있는 띠부실을 정리해 둔 페이지입니다.</p></div>
+</section>
+<section class="stats">
+  <div class="stat"><strong id="ownedCount">0</strong><span>보유</span></div>
+  <div class="stat"><strong id="wantedCount">0</strong><span>구하는 중</span></div>
+</section>
+<section class="toolbar">
+  <input id="search" placeholder="번호 또는 포켓몬 이름 검색">
+  <select id="status"><option value="all">전체</option><option value="owned">보유</option><option value="wanted">구하는 중</option></select>
+</section>
+<section id="grid" class="grid"></section>
+<p id="empty" class="empty" hidden>등록된 띠부실이 없습니다.</p>
+</main>
+<footer>띠부실 COLLECTION</footer>
+</body>
+</html>
