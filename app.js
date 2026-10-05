@@ -51,7 +51,7 @@ function render() {
   });
 
   /* =========================
-     실제 도감 번호 기준 계산
+     보유 / 구하는 중 숫자
   ========================= */
 
   const ownedNumbers = new Set();
@@ -63,17 +63,13 @@ function render() {
   });
 
   const ownedCount = ownedNumbers.size;
-  const totalCount = 1025;
-  const wantedCount = Math.max(
-    totalCount - ownedCount,
-    0
-  );
 
-  const collectionRate =
-    ((ownedCount / totalCount) * 100).toFixed(1);
+  const wantedCount = all.filter(function (item) {
+    return item.status === "wanted";
+  }).length;
 
   document.getElementById("totalCount").textContent =
-    totalCount;
+    1025;
 
   document.getElementById("ownedCount").textContent =
     ownedCount;
@@ -81,27 +77,23 @@ function render() {
   document.getElementById("wantedCount").textContent =
     wantedCount;
 
-  document.getElementById("collectionRate").textContent =
-    collectionRate + "%";
-
   /* =========================
      카드 출력
   ========================= */
 
   grid.innerHTML = list
     .map(function (item) {
-      const number = String(item.number).padStart(3, "0");
-      const name = escapeHtml(
-        item.name || "이름 미등록"
-      );
+      const number =
+        String(item.number).padStart(3, "0");
 
-      const quantity = Number(
-        item.quantity || 0
-      );
+      const name =
+        escapeHtml(item.name || "이름 미등록");
 
-      const form = escapeHtml(
-        item.form || "일반"
-      );
+      const quantity =
+        Number(item.quantity || 0);
+
+      const form =
+        escapeHtml(item.form || "일반");
 
       const statusText =
         item.status === "owned"
